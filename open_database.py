@@ -72,16 +72,16 @@ def graph_pcts_over_years(database_rows_list, years):
 				percentages[i],
 				c=colors[result],
 				s=5,
-				alpha=0.5
+				alpha=0.35
 			)
-		texts = [ax.text(salaries[i], percentages[i], labels[i], color='grey', fontsize=6) for i in range(len(labels))]
+		# texts = [ax.text(salaries[i], percentages[i], labels[i], color='grey', fontsize=6) for i in range(len(labels))]
 
 		gradient, intercept, r_value, p_value, std_err = stats.linregress(salaries, percentages)
 		mn = np.min(salaries)
 		mx = np.max(salaries)
 		x1 = np.linspace(mn, mx, 500)
 		y1 = gradient * x1 + intercept
-		plt.plot(x1, y1, c=colors[result], label='{0}-{1} r={2}'.format(min(years[result]), max(years[result]), round(r_value, 4)))
+		plt.plot(x1, y1, c=colors[result], label='{0} - {1} (r={2})'.format(min(years[result]), max(years[result]), round(r_value, 4)))
 
 
 	fmt = '${x:,.0f}'
@@ -89,7 +89,7 @@ def graph_pcts_over_years(database_rows_list, years):
 	ax.xaxis.set_major_formatter(tick)
 
 	plt.xlim(left=0)
-	plt.legend(loc='upper left')
+	plt.legend(loc='lower right')
 	master_range = get_master_range_from_list(years)
 	plt.title("Baseball Team Expenditures vs. Win % ({0}-{1})".format(min(master_range), max(master_range)))
 	plt.ylabel("Preseason Win %")
@@ -110,7 +110,7 @@ def get_master_range_from_list(ranges_list):
 
 def main():
 	database = "C:\\Users\\werdn\\Documents\\MLB-math-IA\\lahman-imported.db"
-	database_ranges = [range(1980, 1991), range(1990, 2001), range(2000, 2011)]
+	database_ranges = [range(1980, 1990), range(1990, 2000), range(2000, 2010)]
 
 	# create a database connection
 	conn = create_connection(database)
