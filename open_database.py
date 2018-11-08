@@ -31,15 +31,15 @@ def _list_to_query_string(data):
 	return data_string
 
 
-def get_annual_salary_and_record(connection, team, years):
+def get_annual_salary_and_record(connection, teams, years):
 	cur = connection.cursor()
 	cur.execute("""
 		SELECT sum(salaries.salary), salaries.teamID, salaries.yearID, ( CAST(teams.W AS FLOAT) / (teams.W+teams.L) ), teams.W, teams.L
 		FROM salaries
 		JOIN teams ON teams.teamID = salaries.teamID AND teams.yearID = salaries.yearID
-		WHERE salaries.teamID = '{0}' and salaries.yearID in ({1})
+		WHERE salaries.teamID in ({0}) and salaries.yearID in ({1})
 		GROUP BY salaries.teamID, salaries.yearID;
-		""".format(team, _list_to_query_string(years)))
+		""".format(_list_to_query_string(teams), _list_to_query_string(years)))
 		# WHERE salaries.teamID in ('ATL', 'BAL') and salaries.yearID in ({1})   # for multiple teams
 	rows = cur.fetchall()
 	print(rows)
@@ -51,8 +51,8 @@ def main():
 
 	# create a database connection
 	conn = create_connection(database)
-	team = 'BOS'
-	get_annual_salary_and_record(conn, team, range(1990, 2000))
+	teams = ['BOS', 'COL']
+	get_annual_salary_and_record(conn, teams, range(1990, 2000))
 
 
 if __name__ == '__main__':
