@@ -1,6 +1,7 @@
 import sqlite3
 from sqlite3 import Error
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mtick
 from scipy import stats
 import numpy as np
 from adjustText import adjust_text
@@ -51,30 +52,43 @@ def get_annual_salary_and_record(connection, teams, years):
 	return rows
 
 
-def graph_pcts_over_years(database_rows, years):
+def generate_color_list(count):
+	color_list = ['r', 'g', 'b', 'y']
+	return color_list
+
+
+def graph_pcts_over_years(database_rows_list, years):
 	fig, ax = plt.subplots()
 	fig.set_size_inches(18, 9)
-	percentages = [row[3] for row in database_rows]
-	salaries = [row[0] for row in database_rows]
-	labels = ["{0} ({1})".format(row[1], row[2]) for row in database_rows]
+	colors = generate_color_list(len(database_rows_list))
 
-	for i in range(0, len(labels)):
-		ax.scatter(
-			salaries[i],
-			percentages[i],
-			c='r',
-			s=5
-		)
-	texts = [ax.text(salaries[i], percentages[i], labels[i], color='grey', fontsize=6) for i in range(len(labels))]
+	for result in range(0, len(database_rows_list)):
+		percentages = [row[3] for row in database_rows_list[result]]
+		salaries = [row[0] for row in database_rows_list[result]]
+		labels = ["{0} ({1})".format(row[1], row[2]) for row in database_rows_list[result]]
+		for i in range(0, len(labels)):
+			ax.scatter(
+				salaries[i],
+				percentages[i],
+				c=colors[result],
+				s=5,
+				alpha=0.5
+			)
+		texts = [ax.text(salaries[i], percentages[i], labels[i], color='grey', fontsize=6) for i in range(len(labels))]
 
-	gradient, intercept, r_value, p_value, std_err = stats.linregress(salaries, percentages)
-	mn = np.min(salaries)
-	mx = np.max(salaries)
-	x1 = np.linspace(mn, mx, 500)
-	y1 = gradient * x1 + intercept
-	plt.plot(x1, y1, c='b')
+		gradient, intercept, r_value, p_value, std_err = stats.linregress(salaries, percentages)
+		mn = np.min(salaries)
+		mx = np.max(salaries)
+		x1 = np.linspace(mn, mx, 500)
+		y1 = gradient * x1 + intercept
+		plt.plot(x1, y1, c=colors[result], label='r={0}'.format(r_value))
 
 
+	fmt = '${x:,.0f}'
+	tick = mtick.StrMethodFormatter(fmt)
+	ax.xaxis.set_major_formatter(tick)
+
+	plt.xlim(left=0)
 	plt.legend(loc='upper left')
 	plt.title("Baseball Team Expenditures vs. Win % ({0}-{1})".format(min(years), max(years)))
 	plt.ylabel("Preseason Win %")
@@ -84,15 +98,23 @@ def graph_pcts_over_years(database_rows, years):
 
 def main():
 	database = "C:\\Users\\werdn\\Documents\\MLB-math-IA\\lahman-imported.db"
-
+	entire_range = range(1980, 2010)
+	database_ranges = [range(1980, 1990), range(1990, 2000), range(2000, 2010)]
+	print(database_ranges)
 	# create a database connection
 	conn = create_connection(database)
-	# teams = ['BOS', 'COL']
+	results = []
 	teams = get_teams_list(conn)
-	years = range(1980, 2017)
-	results = get_annual_salary_and_record(conn, teams, years)
-	print(len(results), 'rows used...')
-	graph_pcts_over_years(results, years)
+	for years in database_ranges:
+		results.append(get_annual_salary_and_record(conn, teams, years))
+
+	# get list of results
+	results_count = 0
+	for year_range_records in results:
+		results_count += len(year_range_records)
+
+	print(results_count, 'rows used...')
+	graph_pcts_over_years(results, entire_range)
 
 
 if __name__ == '__main__':
