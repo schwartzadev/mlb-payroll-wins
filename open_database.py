@@ -11,6 +11,13 @@ def create_connection(db_file):
 	return None
 
 
+def get_teams_list(connection):
+	cur = connection.cursor()
+	cur.execute("SELECT DISTINCT teamID from teams")
+	rows = cur.fetchall()
+	print(rows)
+
+
 def get_annual_salary(connection, team, year):
 	cur = connection.cursor()
 	cur.execute("SELECT sum(salary) from salaries where teamID is '{0}' and yearID is '{1}'".format(team, year))
@@ -24,7 +31,8 @@ def main():
 
 	# create a database connection
 	conn = create_connection(database)
-	get_annual_salary(conn, 'WAS', 2005)
+	# get_annual_salary(conn, 'WAS', 2005)
+	get_teams_list(conn)
 
 if __name__ == '__main__':
 	main()
