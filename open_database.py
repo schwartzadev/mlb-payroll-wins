@@ -25,9 +25,13 @@ def get_team_record(connection, team, year):
 	print(rows)
 
 
+def _list_to_query_string(data):
+	data = ["'"+str(y)+"'" for y in data]
+	data_string = ', '.join(data)
+	return data_string
+
+
 def get_annual_salary_and_record(connection, team, years):
-	years = ["'"+str(y)+"'" for y in years]
-	years_string = ', '.join(years)
 	cur = connection.cursor()
 	cur.execute("""
 		SELECT sum(salaries.salary), salaries.teamID, salaries.yearID, ( CAST(teams.W AS FLOAT) / (teams.W+teams.L) ), teams.W, teams.L
@@ -35,7 +39,7 @@ def get_annual_salary_and_record(connection, team, years):
 		JOIN teams ON teams.teamID = salaries.teamID AND teams.yearID = salaries.yearID
 		WHERE salaries.teamID = '{0}' and salaries.yearID in ({1})
 		GROUP BY salaries.teamID, salaries.yearID;
-		""".format(team, years_string))
+		""".format(team, _list_to_query_string(years)))
 		# WHERE salaries.teamID in ('ATL', 'BAL') and salaries.yearID in ({1})   # for multiple teams
 	rows = cur.fetchall()
 	print(rows)
