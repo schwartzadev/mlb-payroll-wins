@@ -81,7 +81,7 @@ def graph_pcts_over_years(database_rows_list, years):
 		mx = np.max(salaries)
 		x1 = np.linspace(mn, mx, 500)
 		y1 = gradient * x1 + intercept
-		plt.plot(x1, y1, c=colors[result], label='r={0}'.format(r_value))
+		plt.plot(x1, y1, c=colors[result], label='{0}-{1} r={2}'.format(min(years[result]), max(years[result]), round(r_value, 4)))
 
 
 	fmt = '${x:,.0f}'
@@ -90,17 +90,28 @@ def graph_pcts_over_years(database_rows_list, years):
 
 	plt.xlim(left=0)
 	plt.legend(loc='upper left')
-	plt.title("Baseball Team Expenditures vs. Win % ({0}-{1})".format(min(years), max(years)))
+	master_range = get_master_range_from_list(years)
+	plt.title("Baseball Team Expenditures vs. Win % ({0}-{1})".format(min(master_range), max(master_range)))
 	plt.ylabel("Preseason Win %")
 	plt.xlabel("Annual Expenditure ($)")
 	plt.show()
 
 
+def get_master_range_from_list(ranges_list):
+	master_max = max(ranges_list[0])
+	master_min = min(ranges_list[0])
+	for r in ranges_list[1:]:
+		if min(r) < master_min:
+			master_min = min(r)
+		if max(r) > master_max:
+			master_max = max(r)
+	return range(master_min, master_max + 1)
+
+
 def main():
 	database = "C:\\Users\\werdn\\Documents\\MLB-math-IA\\lahman-imported.db"
-	entire_range = range(1980, 2010)
-	database_ranges = [range(1980, 1990), range(1990, 2000), range(2000, 2010)]
-	print(database_ranges)
+	database_ranges = [range(1980, 1991), range(1990, 2001), range(2000, 2011)]
+
 	# create a database connection
 	conn = create_connection(database)
 	results = []
@@ -114,7 +125,8 @@ def main():
 		results_count += len(year_range_records)
 
 	print(results_count, 'rows used...')
-	graph_pcts_over_years(results, entire_range)
+	graph_pcts_over_years(results, database_ranges)
+
 
 
 if __name__ == '__main__':
