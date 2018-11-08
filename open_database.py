@@ -91,9 +91,9 @@ def graph_pcts_over_years(database_rows_list, years):
 	plt.xlim(left=0)
 	plt.legend(loc='lower right')
 	master_range = get_master_range_from_list(years)
-	plt.title("Baseball Team Expenditures vs. Win % ({0}-{1})".format(min(master_range), max(master_range)))
-	plt.ylabel("Preseason Win %")
-	plt.xlabel("Annual Expenditure ($)")
+	plt.title("Baseball Team Expenditures vs. Win % ({0}-{1})".format(min(master_range), max(master_range)), fontdict={'fontsize': 18})
+	plt.ylabel("Preseason Win %", style='italic')
+	plt.xlabel("Annual Expenditure ($)", style='italic')
 	plt.show()
 
 
