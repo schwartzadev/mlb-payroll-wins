@@ -44,7 +44,7 @@ def get_annual_salary_and_record(connection, teams, years):
 		SELECT sum(salaries.salary), salaries.teamID, salaries.yearID, ( CAST(teams.W AS FLOAT) / (teams.W+teams.L) ), teams.W, teams.L
 		FROM salaries
 		JOIN teams ON teams.teamID = salaries.teamID AND teams.yearID = salaries.yearID
-		WHERE salaries.teamID in ({0}) and salaries.yearID in ({1})
+		WHERE salaries.teamID in ({0}) and salaries.yearID in ({1}) and salaries.salary is NOT NULL
 		GROUP BY salaries.teamID, salaries.yearID;
 		""".format(_list_to_query_string(teams), _list_to_query_string(years)))
 		# WHERE salaries.teamID in ('ATL', 'BAL') and salaries.yearID in ({1})   # for multiple teams
@@ -53,7 +53,7 @@ def get_annual_salary_and_record(connection, teams, years):
 
 
 def generate_color_list(count):
-	color_list = ['r', 'g', 'b', 'y']
+	color_list = ['r', 'g', 'b', 'black']
 	return color_list
 
 
@@ -71,7 +71,7 @@ def graph_pcts_over_years(database_rows_list, years):
 				salaries[i],
 				percentages[i],
 				c=colors[result],
-				s=5,
+				s=8,
 				alpha=0.35
 			)
 		# texts = [ax.text(salaries[i], percentages[i], labels[i], color='grey', fontsize=6) for i in range(len(labels))]
@@ -110,7 +110,12 @@ def get_master_range_from_list(ranges_list):
 
 def main():
 	database = "C:\\Users\\werdn\\Documents\\MLB-math-IA\\lahman-imported.db"
-	database_ranges = [range(1980, 1990), range(1990, 2000), range(2000, 2010)]
+	database_ranges = [
+		range(1980, 1990),
+		range(1990, 2000),
+		range(2000, 2010),
+		range(2010, 2017)
+	]
 
 	# create a database connection
 	conn = create_connection(database)
