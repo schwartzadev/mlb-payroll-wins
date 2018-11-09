@@ -53,7 +53,30 @@ def get_annual_salary_and_record(connection, teams, years):
 
 
 def generate_color_list(count):
-	color_list = ['r', 'g', 'b', 'black']
+	color_list = [
+		'#e6194B',
+		'#3cb44b',
+		'#ffe119',
+		'#4363d8',
+		'#f58231',
+		'#911eb4',
+		'#42d4f4',
+		'#f032e6',
+		'#bfef45',
+		'#fabebe',
+		'#469990',
+		'#e6beff',
+		'#9A6324',
+		'#fffac8',
+		'#800000',
+		'#aaffc3',
+		'#808000',
+		'#ffd8b1',
+		'#000075',
+		'#a9a9a9',
+		'#ffffff',
+		'#000000'
+	]
 	return color_list
 
 
@@ -111,9 +134,12 @@ def get_master_range_from_list(ranges_list):
 def main():
 	database = "C:\\Users\\werdn\\Documents\\MLB-math-IA\\lahman-imported.db"
 	database_ranges = [
-		range(1980, 1990),
-		range(1990, 2000),
-		range(2000, 2010),
+		# range(1980, 1985),
+		range(1985, 1990),
+		range(1990, 1995),
+		range(1995, 2000),
+		range(2000, 2005),
+		range(2005, 2010),
 		range(2010, 2017)
 	]
 
