@@ -41,7 +41,7 @@ def _list_to_query_string(data):
 def get_annual_salary_and_record(connection, teams, years):
 	cur = connection.cursor()
 	cur.execute("""
-		SELECT sum(salaries.salary), salaries.teamID, salaries.yearID, ( CAST(teams.W AS FLOAT) / (teams.W+teams.L) ), teams.W, teams.L
+		SELECT sum(salaries.salary), salaries.teamID, salaries.yearID, ( CAST(teams.W AS FLOAT) / (teams.W+teams.L) ), teams.franchID
 		FROM salaries
 		JOIN teams ON teams.teamID = salaries.teamID AND teams.yearID = salaries.yearID
 		WHERE salaries.teamID in ({0}) and salaries.yearID in ({1}) and salaries.salary is NOT NULL
@@ -88,7 +88,7 @@ def graph_pcts_over_years(database_rows_list, years):
 	for result in range(0, len(database_rows_list)):
 		percentages = [row[3] for row in database_rows_list[result]]
 		salaries = [row[0] for row in database_rows_list[result]]
-		labels = ["{0} ({1})".format(row[1], row[2]) for row in database_rows_list[result]]
+		labels = ["{0} ({1})".format(row[4], row[2]) for row in database_rows_list[result]]
 		for i in range(0, len(labels)):
 			ax.scatter(
 				salaries[i],
