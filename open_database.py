@@ -7,6 +7,9 @@ import numpy as np
 from adjustText import adjust_text
 
 
+LATEST_CPI_U = 251.001
+
+
 def create_connection(db_file):
 	try:
 		conn = sqlite3.connect(db_file)
@@ -41,13 +44,18 @@ def _list_to_query_string(data):
 def get_annual_salary_and_record(connection, teams, years):
 	cur = connection.cursor()
 	cur.execute("""
-		SELECT sum(salaries.salary), salaries.teamID, salaries.yearID, ( CAST(teams.W AS FLOAT) / (teams.W+teams.L) ), teams.franchID
+		SELECT
+			sum(salaries.salary),
+			salaries.teamID,  -- internal team ID (not always the frandhise IDs)
+			salaries.yearID,  -- year for this datapoint
+			( CAST(teams.W AS FLOAT) / (teams.W+teams.L) ),  --- win %
+			teams.franchID,  --- the generally known franchise ID
+			round( ( sum(salaries.salary) * {0} ) / (SELECT i.value FROM inflation i WHERE i.year = salaries.yearID), 2 )  --- inflation adjusted salary sum
 		FROM salaries
 		JOIN teams ON teams.teamID = salaries.teamID AND teams.yearID = salaries.yearID
-		WHERE salaries.teamID in ({0}) and salaries.yearID in ({1}) and salaries.salary is NOT NULL
+		WHERE salaries.teamID in ({1}) and salaries.yearID in ({2}) and salaries.salary is NOT NULL
 		GROUP BY salaries.teamID, salaries.yearID;
-		""".format(_list_to_query_string(teams), _list_to_query_string(years)))
-		# WHERE salaries.teamID in ('ATL', 'BAL') and salaries.yearID in ({1})   # for multiple teams
+		""".format(LATEST_CPI_U, _list_to_query_string(teams), _list_to_query_string(years)))
 	rows = cur.fetchall()
 	return rows
 
@@ -97,12 +105,23 @@ def graph_pcts_over_years(database_rows_list, years):
 				s=8,
 				alpha=0.35
 			)
+		print("MAX", max(salaries), 'MIN', min(salaries), 'YEARS', years[result])
+		ax.scatter(  # graph mean
+			sum(salaries) / float(len(salaries)),
+			sum(percentages) / float(len(percentages)),
+			c=colors[result],
+			s=30,
+			alpha=1
+		)
+
 		# texts = [ax.text(salaries[i], percentages[i], labels[i], color='grey', fontsize=6) for i in range(len(labels))]
 
 		gradient, intercept, r_value, p_value, std_err = stats.linregress(salaries, percentages)
 		mn = np.min(salaries)
 		mx = np.max(salaries)
 		x1 = np.linspace(mn, mx, 500)
+		print('\t'.join([str(years[result]), str(r_value), str(gradient), str(intercept)]))   # output regression info
+		# print("{0} ({1}):\t{2}x + {3}".format(years[result], r_value, gradient, intercept))   # output regression equation
 		y1 = gradient * x1 + intercept
 		plt.plot(x1, y1, c=colors[result], label='{0} - {1} (r={2})'.format(min(years[result]), max(years[result]), round(r_value, 4)))
 
@@ -157,7 +176,6 @@ def main():
 
 	print(results_count, 'rows used...')
 	graph_pcts_over_years(results, database_ranges)
-
 
 
 if __name__ == '__main__':
