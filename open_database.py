@@ -95,19 +95,28 @@ def graph_pcts_over_years(database_rows_list, years):
 
 	for result in range(0, len(database_rows_list)):
 		percentages = [row[3] for row in database_rows_list[result]]
-		salaries = [row[0] for row in database_rows_list[result]]
+		# salaries = [row[0] for row in database_rows_list[result]]
+		adjusted_salaries = [row[5] for row in database_rows_list[result]]
 		labels = ["{0} ({1})".format(row[4], row[2]) for row in database_rows_list[result]]
 		for i in range(0, len(labels)):
+			# ax.scatter(
+			# 	salaries[i],
+			# 	percentages[i],
+			# 	c=colors[result],
+			# 	s=8,
+			# 	alpha=0.35
+			# )
 			ax.scatter(
-				salaries[i],
+				adjusted_salaries[i],
 				percentages[i],
 				c=colors[result],
 				s=8,
-				alpha=0.35
+				alpha=0.5
 			)
-		print("MAX", max(salaries), 'MIN', min(salaries), 'YEARS', years[result])
+		# print("MAX", max(salaries), 'MIN', min(salaries), 'YEARS', years[result])
+		print("MAX (adjusted)", max(adjusted_salaries), 'MIN (adjusted)', min(adjusted_salaries), 'YEARS', years[result])
 		ax.scatter(  # graph mean
-			sum(salaries) / float(len(salaries)),
+			sum(adjusted_salaries) / float(len(adjusted_salaries)),
 			sum(percentages) / float(len(percentages)),
 			c=colors[result],
 			s=30,
@@ -116,9 +125,9 @@ def graph_pcts_over_years(database_rows_list, years):
 
 		# texts = [ax.text(salaries[i], percentages[i], labels[i], color='grey', fontsize=6) for i in range(len(labels))]
 
-		gradient, intercept, r_value, p_value, std_err = stats.linregress(salaries, percentages)
-		mn = np.min(salaries)
-		mx = np.max(salaries)
+		gradient, intercept, r_value, p_value, std_err = stats.linregress(adjusted_salaries, percentages)
+		mn = np.min(adjusted_salaries)
+		mx = np.max(adjusted_salaries)
 		x1 = np.linspace(mn, mx, 500)
 		print('\t'.join([str(years[result]), str(r_value), str(gradient), str(intercept)]))   # output regression info
 		# print("{0} ({1}):\t{2}x + {3}".format(years[result], r_value, gradient, intercept))   # output regression equation
@@ -133,7 +142,7 @@ def graph_pcts_over_years(database_rows_list, years):
 	plt.xlim(left=0)
 	plt.legend(loc='lower right')
 	master_range = get_master_range_from_list(years)
-	plt.title("Baseball Team Expenditures vs. Win % ({0}-{1})".format(min(master_range), max(master_range)), fontdict={'fontsize': 18})
+	plt.title("Baseball Team Expenditures vs. Win % {0}-{1} (Adjused for Inflation to 2018 Values)".format(min(master_range), max(master_range)), fontdict={'fontsize': 18})
 	plt.ylabel("Preseason Win %", style='italic')
 	plt.xlabel("Annual Expenditure ($)", style='italic')
 	plt.show()
